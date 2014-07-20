@@ -39,25 +39,25 @@ GUISetState(@SW_SHOW)
 
 ; main
 While 1
-	Switch GUIGetMsg()
-		Case $GUI_EVENT_CLOSE
-			Exit
-		Case $GUI_EVENT_DROPPED
-			Local $aFile = StringSplit(GUICtrlRead($hDrop), '|', 2)
+    Switch GUIGetMsg()
+        Case $GUI_EVENT_CLOSE
+            Exit
+        Case $GUI_EVENT_DROPPED
+            Local $aFile = StringSplit(GUICtrlRead($hDrop), '|', 2)
 
-			; validate filetype expect ts
-			For $sFile In $aFile
-				If Not StringRegExp($sFile, '.+\.ts$') Then
-					MsgBox($MB_OKCANCEL, 'File Type Exception', 'This file is not ts file: ' & @CRLF & $sFile)
-					Exit
-				EndIf
-			Next
+            ; validate filetype expect ts
+            For $sFile In $aFile
+                If Not StringRegExp($sFile, '.+\.ts$') Then
+                    MsgBox($MB_OKCANCEL, 'File Type Exception', 'This file is not ts file: ' & @CRLF & $sFile)
+                    Exit
+                EndIf
+            Next
 
             ; ask to execute
-			If MsgBox(True, '', UBound($aFile) & ' files will register to a project') == $IDOK Then
-				RegistFiles($aFile)
-			EndIf
-	EndSwitch
+            If MsgBox(True, '', UBound($aFile) & ' files will register to a project') == $IDOK Then
+                RegistFiles($aFile)
+            EndIf
+    EndSwitch
 WEnd
 
 
@@ -66,34 +66,34 @@ WEnd
 ; Return:       <None>
 ; --------------------------------------------------------------------------------
 Func RegistFiles($aFile)
-	OpenNewProject()
+    OpenNewProject()
 
-	For $sFile In $aFile
-		Local $sTitle = AddFile($sFile)
+    For $sFile In $aFile
+        Local $sTitle = AddFile($sFile)
 
         ; ...
         ; choose a title yourself
         ; ...
 
-		Local $bIsReadable = True
-		Do
+        Local $bIsReadable = True
+        Do
             ; open a broken or unreadable file
-			If WinActive($WINDOW_MESSAGE) Then
-				MsgBox(0, 'Unreadable File Exception', $sFile)
-				$bIsReadable = False
-				ExitLoop
-			EndIf
-		Until WinActive($WINDOW_EDIT)
+            If WinActive($WINDOW_MESSAGE) Then
+                MsgBox(0, 'Unreadable File Exception', $sFile)
+                $bIsReadable = False
+                ExitLoop
+            EndIf
+        Until WinActive($WINDOW_EDIT)
 
-		If $bIsReadable Then
+        If $bIsReadable Then
             ; set a clip name
-			ControlSetText($WINDOW_EDIT, '', $FORM_CLIP_NAME, $sTitle)
-			ControlClick($WINDOW_EDIT, '', $BUTTON_OK)
-			Logging($sFile & @CRLF & '[o] ' & $sTitle & @CRLF)
-		Else
-			Logging($sFile & @CRLF & '[x] ' & $sTitle & @CRLF)
-		EndIf
-	Next
+            ControlSetText($WINDOW_EDIT, '', $FORM_CLIP_NAME, $sTitle)
+            ControlClick($WINDOW_EDIT, '', $BUTTON_OK)
+            Logging($sFile & @CRLF & '[o] ' & $sTitle & @CRLF)
+        Else
+            Logging($sFile & @CRLF & '[x] ' & $sTitle & @CRLF)
+        EndIf
+    Next
 
     MsgBox(0, '', 'Finished')
 EndFunc
@@ -105,15 +105,15 @@ EndFunc
 ; --------------------------------------------------------------------------------
 Func OpenNewProject()
     ; open TMPGEnc VMW
-	If Not WinExists($WINDOW_START) Then
-		Run($TMPGENC_FULL_PATH)
-		WinWaitActive($WINDOW_START)
-	EndIf
-	WinActivate($WINDOW_START)
+    If Not WinExists($WINDOW_START) Then
+        Run($TMPGENC_FULL_PATH)
+        WinWaitActive($WINDOW_START)
+    EndIf
+    WinActivate($WINDOW_START)
 
     ; open new project
-	ControlClick($WINDOW_START, '', $BUTTON_NEW_PROJECT)
-	WinWaitActive($WINDOW_MAIN)
+    ControlClick($WINDOW_START, '', $BUTTON_NEW_PROJECT)
+    WinWaitActive($WINDOW_MAIN)
 EndFunc
 
 
@@ -123,37 +123,37 @@ EndFunc
 ; --------------------------------------------------------------------------------
 Func AddFile($sFile)
     ; open an add file window
-	WinWaitActive($WINDOW_MAIN)
-	ControlClick($WINDOW_MAIN, '', $BUTTON_ADD_FILE)
+    WinWaitActive($WINDOW_MAIN)
+    ControlClick($WINDOW_MAIN, '', $BUTTON_ADD_FILE)
 
     ; split a full path to its directory and its file name
-	Local $aRes = StringRegExp($sFile, '(.+)\\(.+)$', 1)
-	If UBound($aRes) <> 2 Then
-		MsgBox(0, 'File Path Parse Exception', 'Failed to parse a file path: ' & @CRLF & $sFile)
-		Exit
-	EndIf
-	Local $sDir = $aRes[0]
-	Local $sFileName = $aRes[1]
+    Local $aRes = StringRegExp($sFile, '(.+)\\(.+)$', 1)
+    If UBound($aRes) <> 2 Then
+        MsgBox(0, 'File Path Parse Exception', 'Failed to parse a file path: ' & @CRLF & $sFile)
+        Exit
+    EndIf
+    Local $sDir = $aRes[0]
+    Local $sFileName = $aRes[1]
 
     ; open a file
-	WinWaitActive($WINDOW_OPEN)
-	ControlClick($WINDOW_OPEN, '', $FORM_PATH)
-	ControlSetText($WINDOW_OPEN, '', $FORM_PATH, $sDir)
-	Send($sDir & '{ENTER}{ENTER}')
+    WinWaitActive($WINDOW_OPEN)
+    ControlClick($WINDOW_OPEN, '', $FORM_PATH)
+    ControlSetText($WINDOW_OPEN, '', $FORM_PATH, $sDir)
+    Send($sDir & '{ENTER}{ENTER}')
 
     ; wait to open the expect directory
-	Do
-		Sleep(1)
-	Until StringInStr(ControlGetText($WINDOW_OPEN, '', $FORM_PATH), $sDir)
-	ControlSetText($WINDOW_OPEN, '', $FORM_FILE, $sFileName)
-	ControlClick($WINDOW_OPEN, '', $BUTTON_OPEN)
+    Do
+        Sleep(1)
+    Until StringInStr(ControlGetText($WINDOW_OPEN, '', $FORM_PATH), $sDir)
+    ControlSetText($WINDOW_OPEN, '', $FORM_FILE, $sFileName)
+    ControlClick($WINDOW_OPEN, '', $BUTTON_OPEN)
 
     ; remove '.ts' strings
-	Local $aFileName = StringSplit($sFileName, '.')
-	If $aFileName[0] <> 2 Then
-		MsgBox(0, 'Title Parse Exception', 'Failed to split a file name: ' & @CRLF & $sFileName)
-	EndIf
-	Return $aFileName[1]
+    Local $aFileName = StringSplit($sFileName, '.')
+    If $aFileName[0] <> 2 Then
+        MsgBox(0, 'Title Parse Exception', 'Failed to split a file name: ' & @CRLF & $sFileName)
+    EndIf
+    Return $aFileName[1]
 EndFunc
 
 
@@ -162,5 +162,5 @@ EndFunc
 ; Return:       <None>
 ; --------------------------------------------------------------------------------
 Func Logging($sMsg)
-	_GUICtrlEdit_AppendText($hText, $sMsg & @CRLF)
+    _GUICtrlEdit_AppendText($hText, $sMsg & @CRLF)
 EndFunc
